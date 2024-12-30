@@ -1,0 +1,226 @@
+using System;
+
+class Kullanici
+{
+    // Kullanıcı bilgilerini tutan sınıf
+    public int Id { get; set; } // Kullanıcının benzersiz kimliği
+    public string Isim { get; set; } // Kullanıcının adı
+    public double Bakiye { get; set; } // Kullanıcının akbil bakiyesi
+    public int Yas { get; set; } // Kullanıcının yaşı
+
+    // Kullanıcı sınıfının yapıcı metodu
+    public Kullanici(int id, string isim, double bakiye, int yas)
+    {
+        Id = id;
+        Isim = isim;
+        Bakiye = bakiye;
+        Yas = yas;
+    }
+}
+
+class AkbilUygulamasi
+{
+    // Maksimum 100 kullanıcı saklanabilir
+    static Kullanici[] kullanicilar = new Kullanici[100]; // Kullanıcıları saklayan dizi
+    static int kullaniciSayisi = 0; // Mevcut kullanıcı sayısı
+
+    static void Main(string[] args)
+    {
+        while (true) // Ana program döngüsü
+        {
+            Console.WriteLine("\n--- Akbil Uygulaması ---");
+            Console.WriteLine("1. Kullanıcı Ekle");
+            Console.WriteLine("2. Kullanıcı Sil");
+            Console.WriteLine("3. Bakiye Görüntüle");
+            Console.WriteLine("4. Bakiye Yükle");
+            Console.WriteLine("5. Bakiye Harca");
+            Console.WriteLine("6. Çıkış");
+
+            Console.Write("Seçiminizi yapın: ");
+            string secim = Console.ReadLine();
+
+            switch (secim)
+            {
+                case "1":
+                    KullaniciEkle();
+                    break;
+                case "2":
+                    KullaniciSil();
+                    break;
+                case "3":
+                    BakiyeGoruntule();
+                    break;
+                case "4":
+                    BakiyeYukle();
+                    break;
+                case "5":
+                    BakiyeHarca();
+                    break;
+                case "6":
+                    return; // Programdan çıkış
+                default:
+                    Console.WriteLine("Geçersiz seçim. Tekrar deneyin.");
+                    break;
+            }
+        }
+    }
+
+    static void KullaniciEkle()
+    {
+        // Yeni kullanıcı ekleme işlemi
+        if (kullaniciSayisi >= kullanicilar.Length) // Maksimum kullanıcı kontrolü
+        {
+            Console.WriteLine("Maksimum kullanıcı sayısına ulaşıldı.");
+            return;
+        }
+
+        Console.Write("Kullanıcı ismi: ");
+        string isim = Console.ReadLine();
+        Console.Write("Başlangıç bakiyesi: ");
+        if (!double.TryParse(Console.ReadLine(), out double bakiye)) // Geçerli bir bakiye girildi mi?
+        {
+            Console.WriteLine("Geçersiz bakiye.");
+            return;
+        }
+        Console.Write("Kullanıcının yaşı: ");
+        if (!int.TryParse(Console.ReadLine(), out int yas) || yas < 0) // Geçerli bir yaş girildi mi?
+        {
+            Console.WriteLine("Geçersiz yaş.");
+            return;
+        }
+
+        // Yaşa göre hak tanımlama
+        if (yas < 18 || yas >= 65)
+        {
+            Console.WriteLine("Ücretsiz kullanım hakkı tanımlandı.");
+            bakiye = 0; // Ücretsiz kullanıcılar için bakiye sıfırlanır
+        }
+        else if (yas >= 18 && yas < 65)
+        {
+            Console.WriteLine("İndirimli kullanım hakkı tanımlandı.");
+        }
+
+        int id = kullaniciSayisi + 1; // Benzersiz ID atanır
+        kullanicilar[kullaniciSayisi] = new Kullanici(id, isim, bakiye, yas); // Kullanıcı diziye eklenir
+        kullaniciSayisi++;
+        Console.WriteLine($"Kullanıcı eklendi. ID: {id}, İsim: {isim}, Yaş: {yas}, Bakiye: {bakiye}");
+    }
+
+    static void KullaniciSil()
+    {
+        // Kullanıcı silme işlemi
+        Console.Write("Silinecek kullanıcı ID'si: ");
+        if (!int.TryParse(Console.ReadLine(), out int id)) // Geçerli bir ID girildi mi?
+        {
+            Console.WriteLine("Geçersiz ID.");
+            return;
+        }
+
+        for (int i = 0; i < kullaniciSayisi; i++)
+        {
+            if (kullanicilar[i].Id == id) // ID eşleşmesi kontrolü
+            {
+                // Kullanıcıyı diziden çıkar ve diğer kullanıcıları kaydır
+                for (int j = i; j < kullaniciSayisi - 1; j++)
+                {
+                    kullanicilar[j] = kullanicilar[j + 1];
+                }
+
+                kullaniciSayisi--;
+                Console.WriteLine($"Kullanıcı ID {id} silindi.");
+                return;
+            }
+        }
+
+        Console.WriteLine("Kullanıcı bulunamadı.");
+    }
+
+    static void BakiyeGoruntule()
+    {
+        // Kullanıcının bakiyesini görüntüleme
+        Console.Write("Bakiye görüntülemek için kullanıcı ID'si: ");
+        if (!int.TryParse(Console.ReadLine(), out int id)) // Geçerli bir ID girildi mi?
+        {
+            Console.WriteLine("Geçersiz ID.");
+            return;
+        }
+
+        foreach (var kullanici in kullanicilar)
+        {
+            if (kullanici != null && kullanici.Id == id) // Kullanıcı bulundu mu?
+            {
+                Console.WriteLine($"Kullanıcı: {kullanici.Isim}, Yaş: {kullanici.Yas}, Bakiye: {kullanici.Bakiye}");
+                return;
+            }
+        }
+
+        Console.WriteLine("Kullanıcı bulunamadı.");
+    }
+
+    static void BakiyeYukle()
+    {
+        // Kullanıcının bakiyesine yükleme yapma
+        Console.Write("Bakiye yüklemek için kullanıcı ID'si: ");
+        if (!int.TryParse(Console.ReadLine(), out int id)) // Geçerli bir ID girildi mi?
+        {
+            Console.WriteLine("Geçersiz ID.");
+            return;
+        }
+
+        Console.Write("Yüklenecek tutar: ");
+        if (!double.TryParse(Console.ReadLine(), out double tutar) || tutar <= 0) // Geçerli bir tutar girildi mi?
+        {
+            Console.WriteLine("Geçersiz tutar.");
+            return;
+        }
+
+        foreach (var kullanici in kullanicilar)
+        {
+            if (kullanici != null && kullanici.Id == id) // Kullanıcı bulundu mu?
+            {
+                kullanici.Bakiye += tutar; // Bakiyeye ekleme yapılır
+                Console.WriteLine($"Yeni bakiye: {kullanici.Bakiye}");
+                return;
+            }
+        }
+
+        Console.WriteLine("Kullanıcı bulunamadı.");
+    }
+
+    static void BakiyeHarca()
+    {
+        // Kullanıcının bakiyesinden harcama yapma
+        Console.Write("Harcama yapmak için kullanıcı ID'si: ");
+        if (!int.TryParse(Console.ReadLine(), out int id)) // Geçerli bir ID girildi mi?
+        {
+            Console.WriteLine("Geçersiz ID.");
+            return;
+        }
+
+        Console.Write("Harcama tutarı: ");
+        if (!double.TryParse(Console.ReadLine(), out double tutar) || tutar <= 0) // Geçerli bir tutar girildi mi?
+        {
+            Console.WriteLine("Geçersiz tutar.");
+            return;
+        }
+
+        foreach (var kullanici in kullanicilar)
+        {
+            if (kullanici != null && kullanici.Id == id) // Kullanıcı bulundu mu?
+            {
+                if (kullanici.Bakiye >= tutar) // Yeterli bakiye var mı?
+                {
+                    kullanici.Bakiye -= tutar; // Bakiyeden düşme işlemi
+                    Console.WriteLine($"Yeni bakiye: {kullanici.Bakiye}");
+                }
+                else
+                {
+                    Console.WriteLine("Yetersiz bakiye.");
+                }
+                return;
+            }
+        }
+
+        Console.WriteLine("Kullanıcı bulunamadı.");
+    }
+}
